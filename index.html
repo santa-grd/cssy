@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamera Ponsel</title>
+    <style>
+        body { text-align: center; margin-top: 50px; }
+        video { border: 1px solid black; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>Akses Kamera Ponsel</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <script>
+        const socket = io();
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+
+                const mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = (event) => {
+                    socket.emit('video', event.data);
+                };
+                mediaRecorder.start(100); // Mengirim data setiap 100ms
+            })
+            .catch(err => {
+                console.error("Akses kamera ditolak:", err);
+            });
+
+        socket.on('response_video', (data) => {
+            // Tangani data video yang diterima di sini
+            // Misalnya, Anda bisa menampilkannya di video lain
+        });
+    </script>
+</body>
+</html>
